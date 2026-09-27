@@ -22,6 +22,9 @@
       <span v-if="state.puzzle" class="chip static" title="Clue rows shown">
         <span class="chip-label">Rows</span><strong>{{ state.puzzle.rows.length }}</strong>
       </span>
+      <span v-if="state.startedAt > 0" class="chip static" title="Elapsed time">
+        <span class="chip-label">Time</span><strong>{{ formatTime(state.elapsedMs) }}</strong>
+      </span>
       <span v-if="state.strength > 0" class="chip static" :title="`Each row's clues cover at most ${state.length - state.strength} of the ${state.length} digits`">
         <span class="chip-label">Clues</span><strong>≤{{ state.length - state.strength }}</strong>
       </span>
@@ -66,7 +69,7 @@ import SettingsModal from './components/SettingsModal.vue'
 import StatsModal from './components/StatsModal.vue'
 import EndModal from './components/EndModal.vue'
 import { backspace, check, initGame, moveCursor, setCursor, startDaily, startPractice, typeDigit, useGame } from './composables/useGame'
-import { buildShare, copyText } from './lib/share'
+import { buildShare, copyText, formatTime } from './lib/share'
 
 const { state, ui, announcement, toast, flash, toggleAids } = useGame()
 
@@ -80,12 +83,14 @@ function closeModal(): void {
 watch(
   () => state.status,
   (s) => {
-    if (s !== 'playing') {
-      setTimeout(() => {
-        modal.value = 'end'
-        endModalRef.value?.focusShare()
-      }, 700)
+    if (s === 'playing') {
+      modal.value = null
+      return
     }
+    setTimeout(() => {
+      modal.value = 'end'
+      endModalRef.value?.focusShare()
+    }, 700)
   },
 )
 
@@ -100,6 +105,7 @@ async function doShare(): Promise<void> {
     state.hintsUsed,
     url,
     state.strength > 0 ? state.length - state.strength : 0,
+    state.elapsedMs,
   )
   const ok = await copyText(text)
   flash(ok ? 'Copied to clipboard' : 'Copy failed — select and copy manually')

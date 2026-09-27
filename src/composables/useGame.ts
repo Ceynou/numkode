@@ -32,7 +32,16 @@ const state = reactive({
   status: 'playing' as GameStatus,
   busy: false,
   shake: 0,
+  startedAt: 0 as number,
+  elapsedMs: 0 as number,
 })
+
+const ticker = setInterval(() => {
+  if (state.startedAt > 0 && state.status === 'playing' && !state.busy) {
+    state.elapsedMs = Date.now() - state.startedAt
+  }
+}, 500)
+;(ticker as unknown as { unref?: () => void }).unref?.()
 
 const announcement = ref('')
 const toast = ref('')
@@ -76,6 +85,8 @@ function resetRound(): void {
   state.wrongChecks = 0
   state.status = 'playing'
   state.marks = Array.from({ length: 10 }, () => new Array(len).fill(0))
+  state.startedAt = 0
+  state.elapsedMs = 0
 }
 
 export function startGame(seed: string, length?: number, extra?: number, strength?: number): void {
@@ -94,6 +105,7 @@ export function startGame(seed: string, length?: number, extra?: number, strengt
     if (token !== genToken) return
     state.puzzle = generatePuzzle(seed, len, ext, s === 0 ? 0 : len - s)
     resetRound()
+    state.startedAt = Date.now()
     state.busy = false
     say(`New ${len}-digit puzzle from seed ${seed}. ${state.puzzle.rows.length} clue rows. Fill your answer and press Enter to check.`)
   }, 30)
@@ -153,6 +165,7 @@ export function check(): void {
   const guess = state.answer.map((d) => d as number)
   if (guess.every((d, i) => d === state.puzzle!.secret[i])) {
     state.status = 'solved'
+    if (state.startedAt > 0) state.elapsedMs = Date.now() - state.startedAt
     recordSolved(state.length, state.extra, state.strength, state.wrongChecks, state.hintsUsed)
     say(`Correct! The code was ${state.puzzle.secret.join(' ')}.`)
     return
@@ -165,6 +178,7 @@ export function check(): void {
 export function giveUp(): void {
   if (state.status !== 'playing' || state.busy || !state.puzzle) return
   state.status = 'revealed'
+  if (state.startedAt > 0) state.elapsedMs = Date.now() - state.startedAt
   recordRevealed(state.length, state.extra, state.strength, state.hintsUsed)
   say(`The code was ${state.puzzle.secret.join(' ')}.`)
 }

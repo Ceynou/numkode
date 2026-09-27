@@ -7,9 +7,37 @@
     <meta name="theme-color" content="#0d1220" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>NumKode — seeded number code puzzle</title>
+    <script>
+      ;(function () {
+        var shown = false
+        function fail(msg) {
+          if (shown) return
+          shown = true
+          var el = document.createElement('div')
+          el.style.cssText =
+            'position:fixed;left:12px;right:12px;bottom:12px;z-index:999;background:#7f1d1d;color:#fecaca;padding:12px 16px;border-radius:10px;font:14px/1.5 system-ui,sans-serif'
+          el.textContent = 'NumKode failed to start: ' + msg
+          ;(document.body || document.documentElement).appendChild(el)
+        }
+        window.addEventListener('error', function (e) {
+          var t = e.target
+          if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
+            fail('could not load ' + (t.src || t.href || 'an asset') + '. Serve the site over HTTP (npm run preview, GitHub Pages or any static server) — opening dist/index.html directly from the file system does not work.')
+          } else if (e && e.message) {
+            fail(e.message)
+          }
+        }, true)
+        setTimeout(function () {
+          var app = document.getElementById('app')
+          if (!app || !app.firstElementChild) {
+            fail('the app did not render. If you opened dist/index.html directly from the file system, serve it over HTTP instead (e.g. npm run preview).')
+          }
+        }, 4000)
+      })()
+    </script>
+    <script type="module" crossorigin src="/src/main.ts"></script>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

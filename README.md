@@ -77,6 +77,14 @@ npm run build     # type-check + production build into dist/
 npm run preview   # serve the production build locally
 ```
 
+## Troubleshooting
+
+**Blank page after `npm run build`:** the `dist/` output must be served over HTTP — double-clicking
+`dist/index.html` from the file system shows a blank page because browsers block `type="module"`
+scripts on `file://` URLs. Use `npm run preview`, `npm run dev`, GitHub Pages (below), or any
+static server. If the page still fails, a red banner at the bottom names the reason (e.g. an asset
+that could not be loaded, or the exact runtime error).
+
 ## Deploy to GitHub Pages
 
 1. Push this repository to GitHub.

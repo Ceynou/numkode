@@ -11,12 +11,12 @@
         </span>
       </div>
       <p class="end-par">
-        {{ state.puzzle?.rows.length }} clue rows · streak <strong>{{ stats.streak }}</strong> · best <strong>{{ stats.maxStreak }}</strong>
+        {{ state.puzzle?.rows.length }} clue rows · time <strong>{{ formatTime(state.elapsedMs) }}</strong> · streak <strong>{{ stats.streak }}</strong> · best <strong>{{ stats.maxStreak }}</strong>
       </p>
       <div class="end-actions">
         <button ref="shareBtn" class="btn primary" aria-keyshortcuts="S" @click="emit('share')">Copy result <kbd>S</kbd></button>
-        <button class="btn" aria-keyshortcuts="D" @click="startDaily()">Daily <kbd>D</kbd></button>
-        <button class="btn" aria-keyshortcuts="N" @click="startPractice()">Practice <kbd>N</kbd></button>
+        <button class="btn" aria-keyshortcuts="D" @click="emit('close'); startDaily()">Daily <kbd>D</kbd></button>
+        <button class="btn" aria-keyshortcuts="N" @click="emit('close'); startPractice()">Practice <kbd>N</kbd></button>
       </div>
     </div>
   </Modal>
@@ -26,6 +26,7 @@
 import { ref } from 'vue'
 import Modal from './Modal.vue'
 import { startDaily, startPractice, useGame } from '../composables/useGame'
+import { formatTime } from '../lib/share'
 
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: []; share: [] }>()
